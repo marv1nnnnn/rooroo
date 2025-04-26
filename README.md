@@ -1,6 +1,6 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Swiss Army Knife Agents 🚀
 
-**Version: v0.0.2**
+**Version: v0.1.0**
 
 Welcome to `rooroo`, an AI-powered system designed to achieve **minimalist AI orchestration** for software development using a focused crew of **'Swiss Army Knife' agents** right within your VS Code environment via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). Think of it as having a lean, expert virtual team, precisely coordinated.
 
@@ -48,10 +48,10 @@ The `rooroo` project was conceived with several core principles in mind, directl
 Understanding these ideas is key to leveraging `rooroo`:
 
 1.  **Minimalist Agent Crew:** `rooroo` operates with a lean team of distinct AI agents (modes). Each agent is a focused 'Swiss Army Knife', optimized for a specific role.
-2.  **Orchestration & State Management:** The **🧠 Master Orchestrator** mode is central. It interprets goals, plans strategy, delegates tasks to the 'Swiss Army Knife' agents, monitors progress via `project_state.json`, handles simple issues, and synthesizes results. It manages the overall **minimalist orchestration** process using a central state file.
+2.  **Orchestration & State Management:** The **🧠 Master Orchestrator** mode is central. It interprets goals, plans strategy, delegates tasks to the 'Swiss Army Knife' agents (passing `projectId`), monitors progress via the master state file (`.state/master_project_state.json`), handles *simple direct actions* itself, and synthesizes results. It manages the overall **minimalist orchestration** process using a central state file containing distinct project contexts.
 3.  **Swiss Army Knife Roles:** Each agent (Architect, UX Specialist, Implementer, Validator, DocuCrafter) has a clearly defined, specialized responsibility and operates precisely within that scope.
-4.  **Structured Artifacts:** The system relies on artifacts (`.specs/`, `.design/`, `.docs/`) to maintain context and provide clear inputs/outputs between agents, facilitating DDD.
-5.  **Centralized State (`project_state.json`):** A JSON file acts as the single source of truth for workflow status, task definitions, dependencies, and logs, enabling robust coordination between agents.
+4.  **Structured Artifacts:** The system relies on artifacts (`.specs/`, `.design/`, `.docs/`, `.reports/`) to maintain context and provide clear inputs/outputs between agents, facilitating DDD.
+5.  **Centralized Master State (`.state/master_project_state.json`):** A single JSON file acts as the source of truth for workflow status, task definitions, dependencies, and logs across multiple projects (identified by `projectId`), enabling robust coordination between agents within their assigned context.
 ## 🔄 The Core Development Workflow
 
 `rooroo` guides feature development through a structured, **minimalist** lifecycle managed by the Orchestrator:
@@ -61,19 +61,19 @@ Understanding these ideas is key to leveraging `rooroo`:
     *   **📐 Solution Architect:** Creates technical specifications (`.specs/`).
     *   **🎨 UX Specialist:** Defines user experience and UI design (`.design/`).
 3.  **💻 Implementation:** Once designs are ready, the Orchestrator assigns precise coding tasks to the **⚡ Apex Implementer**, referencing the specs.
-4.  **✅ Validation:** The **🛡️ Guardian Validator** independently verifies the implemented features against the specifications (TDD aspect).
+4.  **✅ Validation:** The **🛡️ Guardian Validator** independently verifies the implemented features against the specifications (TDD aspect), generating reports in `.reports/`.
 5.  **🔄 Iteration:** Based on validation results, the Orchestrator manages feedback loops, assigning refinements or fixes back to the appropriate agents.
 
 *(Note: Documentation tasks are handled separately by the DocuCrafter, see below).*
 
 ## 🤖 Meet the Crew (The Swiss Army Knives) 🤖
 
-*   **🧠 Master Orchestrator (Conductor):** The project lead and central coordinator. Manages the **minimalist orchestration**, delegates tasks, handles simple issues, and communicates with you. (Key to solving Problem 2)
-*   **📐 Solution Architect (Blueprint Creator):** Your dedicated 'Swiss Army Knife' for technical design. Creates detailed architectural blueprints and specifications (`.specs/`). (Key to solving Problem 1 & 3)
-*   **🎨 UX Specialist (User Advocate):** Your dedicated 'Swiss Army Knife' for user experience. Designs user flows and UI structures (`.design/`). (Key to solving Problem 1 & 3)
-*   **⚡ Apex Implementer (Precision Builder):** Your dedicated 'Swiss Army Knife' for coding. Writes high-quality code based strictly on specifications. (Key to solving Problem 1 & 3)
-*   **🛡️ Guardian Validator (Independent Verifier):** Your dedicated 'Swiss Army Knife' for quality assurance. Independently validates implementation against requirements. (Key to solving Problem 1 & 3)
-*   **✍️ DocuCrafter (Markdown Documentation Generator):** Your dedicated 'Swiss Army Knife' for documentation. **Operates primarily on the `.docs/` directory.** Handles specific documentation tasks (`init`, `update`). (Key to solving Problem 3)
+*   **🧠 Master Orchestrator (Balanced Coordinator):** Top-level AI coordinator. Manages project contexts within `.state/master_project_state.json`. Interprets goals, handles *direct read-only info requests* (state, specific files), plans phases, delegates specialized tasks (passing `projectId`). Monitors progress, handles limited errors, triggers debugging, integrates results, communicates. (Key to solving Problem 2)
+*   **📐 Solution Architect (Blueprint Creator):** Expert AI technical designer. Analyzes requirements, researches, creates blueprints (`.specs/`), defines implementation tasks within the specified project context in the master state file. Requests debugging when stuck. (Key to solving Problem 1 & 3)
+*   **🎨 UX Specialist (User Advocate):** Expert AI UX/UI designer. Defines user flows, UI structures, accessibility. Outputs specs to `.design/`. Updates status within the specified project context in the master state file. (Key to solving Problem 1 & 3)
+*   **⚡ Apex Implementer (Precision Builder):** Elite AI coder. Executes tasks based on specs (`.specs/`, `.design/`), context (`.docs/`), using the specified project context in the master state file. Writes tested code, requests debugging, performs refinement. Updates status in the project state file. (Key to solving Problem 1 & 3)
+*   **🛡️ Guardian Validator (Independent Verifier):** Objective AI QA agent. Validates features against specs (`.specs/`, `.design/`), context (`.docs/`), using the specified project context in the master state file. Creates report in `.reports/`, updates status and links report in the project state file. (Key to solving Problem 1 & 3)
+*   **✍️ DocuCrafter (Markdown Documentation Generator):** AI specialist for generating/updating Markdown documentation in `.docs/`. Acts on tasks, updating status within the specified project context in the master state file. (Key to solving Problem 3)
 
 ## 🚀 Get Started! 🚀
 
@@ -87,6 +87,6 @@ Once Roo Code is installed:
 4.  **State Your Goal:** Clearly describe the project or task.
 5.  **Collaborate:** Follow the Orchestrator's lead as it manages the **minimalist orchestration** process.
 6.  **Manage Documentation:** Explicitly ask the Orchestrator to delegate `init` or `update` tasks to the **✍️ DocuCrafter**.
-7.  **Review Artifacts:** Monitor progress by reviewing the outputs from each 'Swiss Army Knife' agent in their respective directories (`.specs/`, `.design/`, `.docs/`).
+7.  **Review Artifacts:** Monitor progress by reviewing the outputs from each 'Swiss Army Knife' agent in their respective directories (`.specs/`, `.design/`, `.docs/`, `.reports/`) and checking the master state file (`.state/master_project_state.json`).
 
 Let `rooroo` bring **minimalist orchestration** and **specialized expertise** to your AI development!
