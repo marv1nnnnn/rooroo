@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.0.5] - 2025-04-26
+
+### Added
+- **New Task Status:** Added `'Implemented'` status to `project_state.json` task schema to signify code/unit tests written but tests not yet executed, creating a user decision point.
+
+### Changed
+- **Workflow Modification:** Introduced an explicit user decision point managed by the Master Orchestrator after a task reaches the `'Implemented'` status.
+- **Master Orchestrator Workflow:** Orchestrator now detects `'Implemented'` status, **prompts the user** to decide on test execution (run tests, skip to validation, defer), and delegates the next step (a specific test execution task or a validation task) based on user input. Updated `customInstructions` to v6.
+- **Apex Implementer Behavior:** Implementer now writes unit tests but **stops before executing them**, updating task status to `'Implemented'` upon successful code/test writing. Updated `customInstructions` to v8.
+- **Test Execution Delegation:** Orchestrator now delegates test execution (when requested by user) as a distinct task (e.g., `type: 'chore'`), often targeting `Guardian Validator` or potentially `Apex Implementer`.
+- **Guardian Validator Capability:** Validator instructions updated (v6) to handle specific "run tests" tasks in addition to full validation tasks, reporting pass/fail accordingly.
 
 ## [v0.0.4] - 2025-04-26
 
