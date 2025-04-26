@@ -1,6 +1,6 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Swiss Army Knife Agents 🚀
 
-**Version: v0.0.3**
+**Version: v0.0.4**
 
 Welcome to `rooroo`, an AI-powered system designed to achieve **minimalist AI orchestration** for software development using a focused crew of **'Swiss Army Knife' agents** right within your VS Code environment via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). Think of it as having a lean, expert virtual team, precisely coordinated.
 
@@ -85,7 +85,7 @@ Once Roo Code is installed:
 2.  **Reload Roo Code:** Reload the VS Code window (`Ctrl+Shift+P` or `Cmd+Shift+P` -> "Developer: Reload Window").
 3.  **Activate the Orchestrator:** Open a Roo Code chat and select the **🧠 Master Orchestrator** mode.
 4.  **State Your Goal:** Clearly describe the project or task.
-5.  **Collaborate:** Follow the Orchestrator's lead as it manages the **minimalist orchestration** process via `project_state.json`.
+5.  **Collaborate:** Follow the Orchestrator's lead as it manages the **adaptive minimalist orchestration** process (handling features, bugs, etc.) via `project_state.json`.
 6.  **Manage Documentation:** Explicitly ask the Orchestrator to delegate `init` or `update` tasks to the **✍️ DocuCrafter**.
 7.  **Review Artifacts:** Monitor progress by reviewing the outputs from each 'Swiss Army Knife' agent in their respective directories (`.specs/`, `.design/`, `.docs/`, `.reports/`).
 

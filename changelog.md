@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.0.4] - 2025-04-26
+
+### Added
+- **Task `type` Field:** Introduced a mandatory `type` field (`feature`, `bugfix`, `refactor`, `chore`, `init`, `design`, `validation`, `documentation`) to the `project_state.json` task schema to enable more adaptive workflows.
+- **Enhanced Task References:** Added optional `references.reports` and `references.sourceCode` to the task schema.
+- **Acceptance Criteria:** Added optional `acceptanceCriteria` array to the task schema.
+
+### Changed
+- **Agent Directives Updated (v4/v6):** Updated `customInstructions` for Master Orchestrator (v4), Solution Architect (v4), Apex Implementer (v6), and Guardian Validator (v4) to recognize and adapt behavior based on the new task `type`.
+- **Adaptive Orchestration:** Master Orchestrator now delegates tasks based on their `type`, enabling different workflows for features, bug fixes, refactoring, etc.
+- **Adaptive Design/Analysis:** Solution Architect now handles analysis for bug fixes/refactors and creates type-specific plans/specs.
+- **Adaptive Implementation:** Apex Implementer now adjusts its process based on task type (reading specs, bug reports, or refactoring plans) and emphasizes type-specific testing.
+- **Adaptive Validation:** Guardian Validator now tailors its validation strategy based on task type (checking feature criteria, confirming bug fixes, ensuring refactor regressions).
+- **Task Status Clarification:** Added `Validated` and `Failed` to the list of possible task statuses in schema documentation for clarity.
+
 ## [v0.0.3] - 2025-04-26
 
 ### Changed
