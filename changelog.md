@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.0.7] - 2025-04-27
+
+### Changed
+- **Agent Directives Updated (Split State):** Updated `customInstructions` across multiple agents to implement a split state management strategy using `project_overview.json` for high-level status and `.state/tasks/{taskId}.json` for detailed task information. If previsouly work with `project_state.json`, we suggest deleting it and using the new `project_overview.json` and `.state/tasks/{taskId}.json` files.
+- **State Management Strategy:** Refined the "CRITICAL JSON EDITING STRATEGY" to apply specifically to either the own task file or the overview file depending on the agent's role and the information being updated.
+- **Core Optimization Strategy:** Implemented a core strategy for agents to optimize state I/O. This strategy prioritizes the task payload, reads the agent's own task file only once initially, performs selective external reads (overview, docs, specs, design) only when necessary, consolidates multiple updates to the agent's own task file into a single edit operation per logical step or completion, and minimizes updates to the project overview file by only updating the summary status for the agent's task ID upon reaching a final state (Done, Implemented, Error, Failed, Validated).
+
 ## [v0.0.6] - 2025-04-26
 
 ### Fixed
