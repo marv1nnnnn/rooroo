@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.2.0] - 2025-04-30
+
+### Changed
+
+- **Orchestration Model & Triage Overhauled (Breaking Change & Optimization):** Control flow inverted.
+    - `Workflow Coordinator` (Cheap Model) is now the **Primary Orchestrator & Interface**. Performs strict, rule-based triage on initial requests.
+    - `Strategic Planner` (Smart Model) is now an **On-Demand Specialist**, invoked by the Coordinator for complex planning. Creates/updates `project_overview.json`.
+- **Workflow Coordinator Logic (Breaking Change & Optimization):**
+    - **Triage:** Implements a strict, rule-based decision tree for initial requests, delegating to Planner (Smart), Architect (Smart), `coder-monk`, or DocuCrafter (Cheap) based on keywords/complexity. Asks user if ambiguous.
+    - **Delegation Mechanism (Execution):** Relies **strictly** on the `suggested_mode` field (provided by the Planner) within `project_overview.json` task `delegation_details` for delegating execution tasks to the appropriate agent (e.g., `coder-monk`, `solution-architect`).
+    - **State Management (Decoupled & Signal Driven):**
+        - Waits for platform signals indicating task completion.
+        - **Reads** the completed task's state file (`.state/tasks/{taskId}.json`, created by the executing agent) to get final status, outputs, planned subtasks, validation results, etc.
+        - Validates the structure of the read state file.
+        - Updates `project_overview.json` using **batch operations** based on results read from task state files.
+    - **Efficiency:** Designated as a **Cheap Model** role.
+- **Strategic Planner Role & Output (Breaking Change):**
+    - Invoked via `<new_task>` by the Coordinator.
+    - Primary output is `project_overview.json`, including `delegation_details` with a **`suggested_mode`** field for the Coordinator.
+    - Uses strict `NNN:type:subject` format for `taskId`.
+    - **Does not** create individual `.state/tasks/{taskId}.json` files.
+- **Agent State Reporting (Breaking Change - Decoupled State):**
+    - All executing agents (`solution-architect`, `ux-specialist`, `guardian-validator`, `docu-crafter`, `coder-monk`) now report completion status, outputs, logs, etc., by **creating/writing their own task state file** (`.state/tasks/{their_taskId}.json`) as their final step.
+    - Agents **DO NOT** modify `project_overview.json` directly.
+    - `solution-architect` output includes `planned_subtasks` in its state file.
+    - `guardian-validator` output includes `validation_result_for_target` (with `target_task_id`) in its state file.
+- **Model Tier Designation:** Explicitly added "(Smart Model)" or "(Cheap Model)" designations to agent roles.
+- **Artifact Storage Location:** Consolidated outputs (specs, designs, docs, reports) into subdirectories within `.state/` (e.g., `.state/specs/`).
+- **Task ID Format:** Enforced strict `NNN:type:subject` format for `taskId` created by the Planner.
+
+### Added
+
+- **`suggested_mode` Field:** New required field in `project_overview.json` task `delegation_details`, populated by Planner, used by Coordinator for delegation.
+- **Explicit Triage Logic:** Added rule-based triage to Coordinator.
+- **`coder-monk`:** New custom agent mode responsible for executing coding/refactoring/debugging tasks and reporting status via its own state file. Replaces direct delegation to built-in modes for these task types in the Coordinator's primary flow.
+- **State File Validation:** Coordinator now has explicit steps to validate the structure of `.state/tasks/{taskId}.json` files upon reading them.
+
+### Removed
+
+- **Direct Overview Updates by Specialists:** Removed capability/instruction for specialist agents to directly update `project_overview.json`.
+- **Ambiguous Coordinator Delegation Logic:** Replaced with strict adherence to Planner's `suggested_mode`.
+- **Coordinator's Explicit User Confirmation Loop for Built-ins:** The explicit `<ask_followup_question>` loop after built-in task completion (from v0.1.2) is removed. Completion is now signaled by the `coder-monk` creating its state file.
+- **Planner's `<switch_mode>` Handoff:** Removed.
+- **Direct Delegation to Built-in `code`/`debug` by Coordinator:** Coordinator now delegates coding tasks to the specific `coder-monk` based on Planner's `suggested_mode`.
+
 ## [v0.1.2] - 2025-04-28
 ### Changed
 - **Workflow Coordinator Dispatch Logic Overhauled (Hybrid Model):** The `workflow-coordinator` (now v5 implicitly) uses a fundamentally different dispatch mechanism:
