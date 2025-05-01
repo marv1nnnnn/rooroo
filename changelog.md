@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.2.2] - 2025-05-01
+
+### Changed
+
+- **Task ID Format:** Updated the `taskId` format separator from colon (`:`) to pipe (`|`). The new format is `NNN|type|subject` (e.g., `010|chore|setup_project`). This change is reflected in agent instructions (Planner, Coordinator, etc.) and documentation.
 
 ## [v0.2.1] - 2025-05-01
 

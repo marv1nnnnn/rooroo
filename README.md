@@ -1,6 +1,8 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Specialist Agents 🚀
 
-**Version: v0.2.1** [Changelog](changelog.md)
+**Version: v0.2.2** [Changelog](changelog.md)
+
+> **Note on v0.2.2:** Task ID format updated to use pipe (`|`) separators: `NNN|type|subject`.
 
 > **Note on v0.2.1:** This version adds the `💡 Idea Sparker` mode for interactive brainstorming, operating independently of the core task execution workflow.
 
@@ -72,27 +74,27 @@ This diagram shows the typical directory layout generated and managed by `rooroo
 │       └── session_summary.md
 │   │
 │   └── tasks/                # Individual task state files (CREATED by the agent executing the task)
-│       ├── 010:chore:setup_project.json # Example: Created by Coder Monk on completion
-│       ├── 020:design:api_spec.json    # Example: Created by Solution Architect on completion
-│       ├── 030:feat:implement_login.json # Example: Created by Coder Monk on completion
-│       ├── 040:docs:readme_update.json   # Example: Created by DocuCrafter on completion
-│       └── 050:test:validate_login.json  # Example: Created by Guardian Validator on completion
+│       ├── 010|chore|setup_project.json # Example: Created by Coder Monk on completion
+│       ├── 020|design|api_spec.json    # Example: Created by Solution Architect on completion
+│       ├── 030|feat|implement_login.json # Example: Created by Coder Monk on completion
+│       ├── 040|docs|readme_update.json   # Example: Created by DocuCrafter on completion
+│       └── 050|test|validate_login.json  # Example: Created by Guardian Validator on completion
 │   │
 │   └── specs/                # Output from Solution Architect (Smart)
-│       └── 020:design:api_spec/
+│       └── 020|design|api_spec/
 │           └── user_service_api.md
 │           └── database_schema.md
 │   │
 │   └── design/               # Output from UX Specialist (Smart)
-│       └── NNN:design:some_ux/
+│       └── NNN|design|some_ux/
 │           └── style_guide.md
 │   │
 │   └── docs/                 # Output from DocuCrafter (Cheap)
-│       └── 040:docs:readme_update/
+│       └── 040|docs|readme_update/
 │           └── updated_readme_section.md
 │   │
 │   └── reports/              # Output from Guardian Validator (Cheap)
-│       └── 050:test:validate_login_report.md
+│       └── 050|test|validate_login_report.md
 │
 ├── project_overview.json     # Central plan & task list (Managed ONLY by Coordinator & Planner)
 │
@@ -128,7 +130,7 @@ Configure the underlying LLM for each agent mode (if supported by your environme
     *   *Complex Goal:* Delegates planning to **🏛️ Strategic Planner (Smart)**.
     *   *Design Task:* Delegates directly to **📐 Solution Architect (Smart)**.
     *   *Unclear:* Asks for clarification.
-2.  **✍️ Planning (If Triggered):** The **🏛️ Strategic Planner (Smart)** creates/updates the plan in `project_overview.json`, defining tasks with `delegation_details` (including `suggested_mode` and `NNN:type:subject` `taskId`). Signals completion.
+2.  **✍️ Planning (If Triggered):** The **🏛️ Strategic Planner (Smart)** creates/updates the plan in `project_overview.json`, defining tasks with `delegation_details` (including `suggested_mode` and `NNN|type|subject` `taskId`). Signals completion.
 3.  **🚦 Coordination & Delegation (Execution Cycle):** The **🚦 Workflow Coordinator (Cheap)** starts its execution cycle:
     *   Reads `project_overview.json` to find 'Pending' tasks with met dependencies.
     *   For each ready task, reads `delegation_details` and the crucial `suggested_mode`.
@@ -220,7 +222,7 @@ This ASCII diagram visualizes the `rooroo` v0.2.1 workflow, including the option
 ## 🤖 Meet the Crew 🤖
 
 * **🚦 Workflow Coordinator (Primary Interface / Cheap Model Recommended):** Performs rule-based triage. Manages plan execution by strictly following Planner's `suggested_mode`. Waits for completion signals, reads agent state files (`.state/tasks/`), validates them, and updates `project_overview.json` via batch edits. *Candidate for fast/cheap LLM.*
-* **🏛️ Strategic Planner (On-Demand / Smart Model Recommended):** Invoked by Coordinator. Decomposes goals, creates/updates plan in `project_overview.json` (using `NNN:type:subject` IDs), defines `delegation_details` including `suggested_mode`. *Does not create task state files.* *Candidate for smart/expensive LLM.*
+* **🏛️ Strategic Planner (On-Demand / Smart Model Recommended):** Invoked by Coordinator. Decomposes goals, creates/updates plan in `project_overview.json` (using `NNN|type|subject` IDs), defines `delegation_details` including `suggested_mode`. *Does not create task state files.* *Candidate for smart/expensive LLM.*
 * **📐 Solution Architect (Smart Model Recommended):** Creates technical specifications (output to `.state/specs/`), potentially defines `planned_subtasks`. Creates **only** own task state file (`.state/tasks/{taskId}.json`) upon completion, including output paths and subtasks. *Candidate for smart/expensive LLM.*
 * **🎨 UX Specialist (Smart Model Recommended):** Designs user flows/UI (output to `.state/design/`). Creates **only** own task state file (`.state/tasks/{taskId}.json`) upon completion, including output paths. *Candidate for smart/expensive LLM.*
 * **🛡️ Guardian Validator (Cheap Model Recommended):** Executes validation/tests against a `target_task_id`. Creates reports (output to `.state/reports/`). Reports results (status, `validation_result_for_target`, report path) **only** in own task state file (`.state/tasks/{taskId}.json`). *Candidate for fast/cheap LLM.*
@@ -233,7 +235,7 @@ This ASCII diagram visualizes the `rooroo` v0.2.1 workflow, including the option
 To use this `rooroo` agent team:
 
 1.  **Install Roo Code:** Ensure the [Roo Code VS Code extension](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) is installed.
-2.  **Override Local Modes:** Copy the latest `.roomodes` file (v0.2.1+) into your workspace root.
+2.  **Override Local Modes:** Copy the latest `.roomodes` file (v0.2.2+) into your workspace root.
 3.  **Reload VS Code:** Use `Ctrl+Shift+P` or `Cmd+Shift+P` -> "Developer: Reload Window".
 4.  **(Optional) Activate Idea Sparker (for Brainstorming):** For ideation sessions, open Roo Code chat and select **💡 Idea Sparker (Interactive Partner)**. Engage directly in a brainstorming conversation. Let it save any useful summary to `.state/brainstorming/`.
 5.  **Activate the Coordinator (for Tasks):** For executing planned tasks, open Roo Code chat, select **🚦 Workflow Coordinator (Cheap Model - Primary Interface)**.
@@ -243,4 +245,4 @@ To use this `rooroo` agent team:
 9.  **Review Artifacts & State:** Monitor progress via output directories within `.state/` (`.state/brainstorming/`, `.state/specs/`, etc.), individual task state files in `.state/tasks/`, and the central `project_overview.json`.
 10. **(Repeat)** Continue interacting with the Coordinator for task execution or the Idea Sparker for further brainstorming as needed.
 
-Let `rooroo` v0.2.1 bring **efficient, Coordinator-led, signal-driven orchestration**, **specialized expertise**, and **collaborative ideation** to your AI development!
+Let `rooroo` v0.2.2 bring **efficient, Coordinator-led, signal-driven orchestration**, **specialized expertise**, and **collaborative ideation** to your AI development!
