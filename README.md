@@ -1,8 +1,8 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Specialist Agents 🚀
 
-**Version: v0.3.1** | [Changelog](changelog.md) | [v0.3.1 Details](v0.3.1.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
+**Version: v0.3.2** | [Changelog](changelog.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
 
-`rooroo` provides **minimalist AI orchestration** for software development using **specialist agents** within VS Code via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). It employs a lean, coordinated team with distinct planning and execution phases, driven by a **Coordinator-led, signal-driven workflow**.
+`rooroo` provides **minimalist AI orchestration** for software development using **specialist agents** within VS Code via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). It employs a lean, coordinated team with distinct planning and execution phases, driven by a **Coordinator-led, signal-driven workflow** that includes **automated refinement loops** for handling task failures due to insufficient specification.
 
 ## 🤔 What's in a Name? The Meaning of "rooroo (如如)"
 
@@ -20,10 +20,10 @@ In the context of this project, the name evokes the idea of an underlying, consi
 ## ✨ Key Principles
 
 *   **Minimalism & Specialization:** A small team of agents with clear roles (Smart/Cheap tiers) avoids over-complexity.
-*   **Coordinator-Led Orchestration:** An efficient, signal-driven workflow where the Coordinator triages tasks, follows the Planner's `suggested_mode`, waits for completion signals, reads agent state files (`.state/tasks/*.json`), **validates state files against a schema**, and performs batch updates to the central overview (`project_overview.json`).
+*   **Coordinator-Led Orchestration:** An efficient, signal-driven workflow where the Coordinator triages tasks, follows the Planner's `suggested_mode`, waits for completion signals, reads agent state files (`.state/tasks/*.json`), **validates state files against a schema**, performs batch updates to the central overview (`project_overview.json`), and **manages automated refinement loops** for tasks failing due to underspecification.
 *   **Decoupled State & Central Config:** Agents manage their own state (`.state/tasks/*.json`), which the Coordinator reads and validates. The Planner defines project-wide `project_configuration`, and the Coordinator injects it into tasks, preventing configuration drift.
-*   **Consistent Task Management:** The Coordinator assigns final sequential IDs (`NNN#...`) to all tasks, including sub-tasks initially proposed with temporary IDs (`TEMP#...`).
-*   **Cost-Effectiveness:** Targeted use of Smart vs. Cheap LLMs per role, optimized through decoupled state and batch updates.
+*   **Consistent Task Management:** The Coordinator assigns final sequential IDs (`NNN#...`) to all tasks, including sub-tasks initially proposed with temporary IDs (`TEMP#...`) and refinement tasks (`NNN#chore#refine_...`).
+*   **Cost-Effectiveness:** Targeted use of Smart vs. Cheap LLMs per role, optimized through decoupled state, batch updates, and automated refinement.
 *   **Structured Workflow:** Defined roles, artifacts, and optional DDD/TDD focus promote clarity.
 
 ## 🚀 Get Started & Core Workflow
@@ -45,12 +45,18 @@ Follow these steps to use the `rooroo` agent team:
     *   The Coordinator reads `project_overview.json` for pending tasks.
     *   It delegates tasks to the agent specified by `suggested_mode`, injecting `project_configuration` if defined.
     *   The designated agent executes the task, potentially creating artifacts (e.g., specs in `.state/specs/`, code changes in `src/`).
-    *   **Crucially:** Upon completion/failure, the agent creates its own state file (`.state/tasks/{taskId}.json`) detailing status, outputs, and any new sub-tasks (using temporary `TEMP#...` IDs).
+    *   **Crucially:** Upon completion/failure, the agent creates its own state file (`.state/tasks/{taskId}.json`) detailing status, outputs, errors (potentially signaling insufficient specification), and any new sub-tasks (using temporary `TEMP#...` IDs).
     *   The agent signals completion.
 9.  **Result Processing & Iteration:**
     *   The Coordinator receives the signal and reads the agent's `.state/tasks/{taskId}.json`.
-    *   It validates the state file **against its schema**, assigns final sequential IDs (`NNN#...`) to any temporary sub-task IDs.
-    *   It prepares a list of all necessary updates (status changes, new tasks).
+    *   It validates the state file **against its schema**.
+    *   **Handling Failures:**
+        *   If the state indicates failure due to *insufficient specification*, the Coordinator initiates a **refinement loop**: generates a `NNN#chore#refine_...` task, delegates it to the `Solution Architect` to improve the original task's details, processes the refinement result, updates the original task, and resets it to `Pending`.
+        *   For other failures, the Coordinator updates the task status and error details in the overview.
+    *   **Handling Success/Sub-tasks:**
+        *   If successful, updates status.
+        *   Assigns final sequential IDs (`NNN#...`) to any temporary sub-task IDs (`TEMP#...` or the refinement task ID).
+    *   It prepares a list of all necessary updates (status changes, new tasks, error details, refined task details).
     *   It applies all updates to `project_overview.json` in a **single batch operation**.
     *   The cycle repeats until the plan is complete.
 10. **Review Artifacts:** Monitor progress via `.state/` subdirectories, individual `.state/tasks/*.json` files, and the central `project_overview.json`.
@@ -82,20 +88,30 @@ Follow these steps to use the `rooroo` agent team:
 [Coordinator Waits for Signal] <----------------------- [Agent Creates .state/tasks/{taskId}.json] -> [Agent Signals Completion]
     |
     v
-[Coordinator Reads Agent's .state/tasks/{taskId}.json] -> [Validate State] -> [Assign Final IDs to TEMP# tasks] -> [Prepare Overview Update List] -> [Batch Write Updates to project_overview.json] -> (Loop back to Read project_overview.json)
+[Coordinator Reads Agent's .state/tasks/{taskId}.json] -> [Validate State] -> {Process Status}
+                                                                |         |---(Failed: Insufficient Spec?)-->(Yes)--> [Create & Delegate Refinement Task (to Architect)] -> [Architect Creates Refinement State] -> [Coordinator Processes Refinement State] -> [Update Original Task Details & Status=Pending]
+                                                                |         |
+                                                                |         +---(Failed: Other / Error)-----> [Update Task Status/Error]
+                                                                |         |
+                                                                |         +---(Success / Validated)-------> [Update Task Status]
+                                                                |
+                                                                +--- {New TEMP# Tasks?} --(Yes)--> [Assign Final IDs to TEMP# tasks]
+                                                                |
+                                                                v
+                                                  [Prepare Overview Update List] -> [Batch Write Updates to project_overview.json] -> (Loop back to Read project_overview.json)
 ```
 
 ## 🤖 The Agent Team & Cost Optimization
 
 `rooroo` uses specialized agents, allowing for cost optimization by assigning appropriate LLM tiers:
 
-*   **🚦 Workflow Coordinator (⚡ Cheap/Fast Recommended):** Primary interface, rule-based triage, signal-driven execution, reads state files, injects config, batch updates overview.
+*   **🚦 Workflow Coordinator (⚡ Cheap/Fast Recommended):** Primary interface, rule-based triage, signal-driven execution, reads/validates state files, injects config, **manages refinement loops**, batch updates overview.
 *   **🏛️ Strategic Planner (🧠 Smart/Expensive Recommended):** Decomposes goals, creates/updates `project_overview.json` with tasks, `suggested_mode`, and optional `project_configuration`. Does *not* create task state files.
-*   **📐 Solution Architect (🧠 Smart/Expensive Recommended):** Creates technical specs (`.state/specs/`), potentially defines sub-tasks (using `TEMP#...` IDs). Creates its own task state file (`.state/tasks/{taskId}.json`).
+*   **📐 Solution Architect (🧠 Smart/Expensive Recommended):** Creates technical specs (`.state/specs/`), potentially defines sub-tasks (`TEMP#...`), **handles refinement tasks** (updating specifications based on feedback). Creates its own task state file (`.state/tasks/{taskId}.json`).
 *   **🎨 UX Specialist (🧠 Smart/Expensive Recommended):** Designs UI/UX (`.state/design/`). Creates its own task state file.
 *   **🛡️ Guardian Validator (⚡ Cheap/Fast Recommended):** Executes tests/validation. Creates reports (`.state/reports/`) and its own task state file.
 *   **✍️ DocuCrafter (⚡ Cheap/Fast Recommended):** Generates/updates docs (`.state/docs/`). Creates its own task state file.
-*   **🧘‍♂️ Coder Monk (Custom / Varies):** Executes coding/debugging. Modifies workspace files. Creates its own task state file. Model tier depends on complexity.
+*   **🧘‍♂️ Coder Monk (Custom / Varies):** Executes coding/debugging. Modifies workspace files. **Signals need for refinement** if specs are insufficient via its state file. Creates its own task state file. Model tier depends on complexity.
 *   **💡 Idea Sparker (🧠 Smart/Expensive Recommended):** Interactive brainstorming partner, operates conversationally outside the main workflow.
 
 *Configure the underlying LLM for each agent mode (if supported) to balance cost and capability.*

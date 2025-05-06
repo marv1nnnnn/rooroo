@@ -6,7 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [v0.3.1] - 2025-05-04 (Placeholder Date)
+## [v0.3.2] - 2025-05-05
+
+### Added
+
+- **Automated Refinement Loop:**
+    - Implemented a mechanism where the `Workflow Coordinator` detects task failures specifically caused by insufficient specification (signaled by `Coder Monk` using a specific error message format).
+    - Upon detection, the Coordinator automatically generates a new refinement task (`NNN#chore#refine_{original_subject}`) and delegates it to the `Solution Architect`.
+    - The `Solution Architect` is now explicitly instructed to handle these refinement tasks, analyzing the original details and feedback provided in the context, and outputting revised, more detailed `delegation_details` for the original task via a new `task_output` field in its state file.
+    - The Coordinator processes the successful refinement task's state file, extracts the `updated_delegation_details` from `task_output`, updates the *original* failed task's details in `project_overview.json`, and resets its status to `Pending` for re-execution.
+- **Agent State Schema Update:** Added an optional `task_output` object to the Agent State File schema (`.state/tasks/{taskId}.json`) to facilitate the return of structured data from refinement tasks (specifically `refined_task_id` and `updated_delegation_details`).
+- **Project Overview Schema Update:** Added optional `original_task_details` and `feedback` fields within `delegation_details.context` in the `project_overview.json` schema to pass necessary information to refinement tasks.
+
+### Changed
+
+- **Agent Instructions:** Updated `customInstructions` for `Workflow Coordinator`, `Coder Monk`, and `Solution Architect` to implement and support the automated refinement loop.
+- **Coder Monk Failure Signaling:** `Coder Monk` (v2.6) is now instructed to explicitly signal failures due to insufficient specifications using `status: "Failed"` and a standardized error message format, triggering the refinement process.
+- **Minor Agent Role Updates:** Slightly adjusted titles and descriptions for clarity (e.g., Coder Monk mentions "Refinement Signaling").
+
+
+## [v0.3.1] - 2025-05-04
 
 ### Changed
 
