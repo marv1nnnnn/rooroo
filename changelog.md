@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.4.0] - 2025-05-08
+
+### BREAKING CHANGE
+
+- **Retirement of `project_overview.json`:** This central JSON file for task and project configuration management has been entirely removed.
+- **Introduction of `task_queue.jsonl`:**
+    - This new file is now the primary source for task definitions and the execution queue.
+    - Each line is a JSON object representing a single task, conforming to a schema including `task_id`, `delegation_details`, `dependencies_original`, `priority`, and `added_to_queue_at`.
+    - The `Strategic Planner` is now solely responsible for creating, managing the content and order of, and assigning all final `NNN#` IDs within this file.
+    - The `Workflow Coordinator` consumes tasks from the top of this file and rewrites the remainder, but does not otherwise modify its content or structure.
+- **Introduction of `task_log.jsonl`:**
+    - A new append-only file for structured event logging.
+    - Both `Workflow Coordinator` and `Strategic Planner` write timestamped JSON log entries to this file, detailing their actions (e.g., `task_delegated`, `task_completed`, `plan_updated`, `task_integrated_into_queue`) with their respective `actor_mode`.
+- **`Workflow Coordinator` Role Overhaul:**
+    - Role significantly simplified to be a more mechanical dispatcher and logger.
+    - Triage_new user requests to the `Strategic Planner` by creating temporary tasks in `task_queue.jsonl`.
+    - Consumes tasks from `task_queue.jsonl`, logs events to `task_log.jsonl`, and delegates to agents.
+    - Handles agent completion signals by reading agent state files (`.state/tasks/{taskId}.json`) and logging results to `task_log.jsonl` before proceeding to the next task.
+    - Defers all complex planning, queue modification, ID assignment, and error/refinement strategy to the `Strategic Planner`.
+- **`Strategic Planner` Role Expansion:**
+    - Becomes the sole authority for the content, structure, and integrity of `task_queue.jsonl`.
+    - Manages all aspects of task ID generation (final `NNN#` IDs) using a strategy based on existing queue content.
+    - Responsible for integrating all new tasks, sub-tasks (from agent proposals), and refinements directly into `task_queue.jsonl`.
+    - Handles error analysis and refinement loop initiation by modifying `task_queue.jsonl` (e.g., adding refinement tasks).
+    - Logs its planning and queue management activities to `task_log.jsonl`.
+- **Retirement of Central `project_configuration`:** The top-level `project_configuration` object, previously in `project_overview.json`, has been removed. Project-specific settings, if needed, are expected to be embedded by the `Strategic Planner` into individual task `delegation_details.context` within `task_queue.jsonl`.
+
+### Changed
+
+- Updated `customInstructions` for `Workflow Coordinator` and `Strategic Planner` to reflect their new roles, responsibilities, and interactions with `task_queue.jsonl` and `task_log.jsonl`.
+- Documentation (`README.md`, agent role descriptions) updated to reflect the new architecture and file structures.
+
 ## [v0.3.3] - 2025-05-06
 
 ### Changed
