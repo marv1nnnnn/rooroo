@@ -1,6 +1,6 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Specialist Agents 🚀
 
-**Version: v0.4.1** | [Changelog](changelog.md) | [v0.4.0 Details](v0.4.0.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
+**Version: v0.4.2** | [Changelog](changelog.md) | [v0.4.0 Details](v0.4.0.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
 
 `rooroo` provides **minimalist AI orchestration** for software development using **specialist agents** within VS Code via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). It employs a lean, coordinated team with distinct planning and execution phases, driven by a **Coordinator-led, signal-driven workflow** using **`task_queue.jsonl`** for task management and **`task_log.jsonl`** for event logging. The `Strategic Planner` manages the queue, while the `Workflow Coordinator` dispatches tasks and logs progress.
 
@@ -20,7 +20,7 @@ In the context of this project, the name evokes the idea of an underlying, consi
 ## ✨ Key Principles
 
 *   **Minimalism & Specialization:** A small team of agents with clear roles (Smart/Cheap tiers) avoids over-complexity.
-*   **Coordinator-Led Orchestration:** An efficient, signal-driven workflow where the `Workflow Coordinator` triages new requests (delegating planning to the `Strategic Planner`), dispatches tasks from `task_queue.jsonl` based on the Planner's definitions, waits for completion signals, reads agent state files (`.state/tasks/*.json`), logs events to `task_log.jsonl`, and consumes tasks from the queue.
+*   **Coordinator-Led Orchestration:** An efficient, signal-driven workflow where the `Workflow Coordinator` triages new requests (delegating planning to the `Strategic Planner`), dispatches tasks from `task_queue.jsonl` based on the Planner's definitions, waits for completion signals, reads agent state files (`.state/tasks/*.json`), logs events to `task_log.jsonl`, consumes tasks from the queue, and interactively handles certain error conditions (like missing state files or agent-reported failures) with the user.
 *   **Planner-Managed Queue:** The `Strategic Planner` has sole authority over `task_queue.jsonl`, including task creation, ID assignment, integration of new work, and managing refinement loops by modifying the queue.
 *   **Decoupled State & Logging:** Agents manage their own state (`.state/tasks/*.json`), which the Coordinator reads. Key lifecycle events are logged to `task_log.jsonl` by the Coordinator and Planner.
 *   **Consistent Task Management:** The `Strategic Planner` assigns final sequential IDs (`NNN#...`) to all tasks in `task_queue.jsonl`.
@@ -58,12 +58,20 @@ Follow these steps to use the `rooroo` agent team:
     *   **Crucially:** Upon completion/failure, the agent creates its own state file (`.state/tasks/{taskId}.json`) detailing its status, any outputs (like file references or sub-task proposals), and errors.
     *   The agent signals completion (or failure) to the platform.
 9.  **Result Processing & Iteration:**
-    *   The `Workflow Coordinator` receives the signal and reads the agent's `.state/tasks/{taskId}.json`.
-    *   It logs the completion/failure event to `task_log.jsonl`.
-    *   **Handling Failures:** If a task fails, the `Strategic Planner` is responsible for analyzing the failure (based on logs and agent state files, often triggered by a specific review task for the Planner) and deciding on the course of action (e.g., creating a refinement task, re-queueing, etc.) by modifying `task_queue.jsonl`.
-    *   **Handling Success/Sub-tasks:** If an agent (like `Solution Architect`) proposes new sub-tasks in its state file (with `TEMP#...` IDs), a subsequent task for the `Strategic Planner` will handle their integration into `task_queue.jsonl` with final `NNN#...` IDs.
-    *   The Coordinator informs the user of the task completion status.
-    *   The cycle repeats with the Coordinator picking the next task from `task_queue.jsonl`.
+    *   The `Workflow Coordinator` receives the signal indicating task completion or failure.
+    *   **State File Handling:** It attempts to read the agent's corresponding state file (`.state/tasks/{taskId}.json`).
+        *   **If the state file is missing or unreadable:** The Coordinator logs a `missing_state_file_error` to `task_log.jsonl`, informs the user, and presents options: `[RetryCheck]` (to try reading the file again after a short delay), `[MarkAsFailed]` (to treat the task as failed due to the missing file), `[PlannerInvestigateSystemIssue]` (to delegate analysis of the missing file to the `Strategic Planner`), or `[Abort]`. The workflow proceeds based on user selection.
+        *   **If the state file is read successfully:**
+            *   The Coordinator validates the `taskId` within the state file. If mismatched, it logs a `system_error` and awaits user instruction or manual intervention.
+            *   It extracts the agent's reported status (`Done`, `Failed`, `Error`, etc.), outputs, and any error messages.
+            *   It logs the appropriate event (e.g., `task_completed`, `task_failed`) to `task_log.jsonl`.
+        *   **Handling Agent-Reported Failures:** If the agent's state file indicates a `Failed` or `Error` status (or if the user chose `MarkAsFailed` for a missing state file):
+            *   The Coordinator informs the user of the failure and the reported error message.
+            *   It presents options to the user: `[Retry]` (to re-delegate the same task), `[Skip]` (to ignore the failure and move to the next task), `[PlannerReviewTaskFailure]` (to have the `Strategic Planner` analyze the failure and decide on next steps like creating a refinement task or re-queueing), or `[Abort]`. The workflow proceeds based on user selection.
+        *   **Handling Planner Intervention:** If the user opts for `PlannerInvestigateSystemIssue` (for missing state files) or `PlannerReviewTaskFailure` (for agent-reported failures), the Coordinator creates a temporary task for the `Strategic Planner`. The Planner will then analyze the situation, potentially modify `task_queue.jsonl` (e.g., by adding a refined task, a new investigation task, or re-queueing), and log its actions. The Coordinator awaits the Planner's completion before reassessing the main task queue.
+        *   **Handling Success/Sub-tasks:** If an agent (like `Solution Architect`) successfully completes its task and proposes new sub-tasks in its state file (with `TEMP#...` IDs), a subsequent task for the `Strategic Planner` will handle their integration into `task_queue.jsonl` with final `NNN#...` IDs.
+        *   The Coordinator informs the user of the task completion status or the chosen error handling path.
+        *   If the previous task was successfully completed, skipped, or if a recoverable error path (like retry) was taken that doesn't halt the queue, the cycle repeats with the Coordinator picking the next task from `task_queue.jsonl`.
 10. **Review Artifacts:** Monitor progress via `.state/` subdirectories, individual `.state/tasks/*.json` files, `task_queue.jsonl`, and `task_log.jsonl`.
 
 ### Workflow Diagram
@@ -126,8 +134,8 @@ Follow these steps to use the `rooroo` agent team:
 
 `rooroo` uses specialized agents, allowing for cost optimization by assigning appropriate LLM tiers:
 
-*   **🚦 Workflow Coordinator (⚡ Cheap/Fast Recommended):** Primary interface, rule-based triage (delegating planning/integration to Planner), consumes tasks from `task_queue.jsonl`, delegates to agents, reads/processes agent state files, logs all its key actions to `task_log.jsonl`.
-*   **🏛️ Strategic Planner (🧠 Smart/Expensive Recommended):** Sole authority for creating and managing `task_queue.jsonl`. Decomposes goals, integrates new tasks/sub-tasks, assigns all final `NNN#` IDs, manages error handling and refinement strategies by modifying the queue. Logs its planning actions to `task_log.jsonl`.
+*   **🚦 Workflow Coordinator (⚡ Cheap/Fast Recommended):** Primary interface, rule-based triage (delegating planning/integration to Planner), consumes tasks from `task_queue.jsonl`, delegates to agents, reads/processes agent state files, logs all its key actions to `task_log.jsonl`. Features enhanced interactive error handling with the user for missing agent state files and agent-reported task failures.
+*   **🏛️ Strategic Planner (🧠 Smart/Expensive Recommended):** Sole authority for creating and managing `task_queue.jsonl`. Decomposes goals, integrates new tasks/sub-tasks, assigns all final `NNN#` IDs, manages error handling and refinement strategies by modifying the queue. Also analyzes system-level issues (e.g., missing state files) and task failures when escalated by the Coordinator. Logs its planning actions to `task_log.jsonl`.
 *   **📐 Solution Architect (🧠 Smart/Expensive Recommended):** Creates technical specs (`.state/specs/`), potentially defines sub-tasks (using `TEMP#...` IDs in its state file for the Planner to integrate). Handles refinement tasks assigned by the Planner. Creates its own task state file (`.state/tasks/{taskId}.json`).
 *   **🎨 UX Specialist (🧠 Smart/Expensive Recommended):** Designs UI/UX (`.state/design/`). Creates its own task state file.
 *   **🛡️ Guardian Validator (⚡ Cheap/Fast Recommended):** Executes tests/validation. Creates reports (`.state/reports/`) and its own task state file.
@@ -192,7 +200,7 @@ Example log entry structure:
 Key fields per log entry:
 *   `log_id`: Unique identifier for the log entry (e.g., UUID).
 *   `timestamp`: ISO 8601 timestamp of the event.
-*   `event_type`: Type of event (e.g., `task_delegated`, `task_completed`, `task_failed`, `plan_updated`, `task_integrated_into_queue`, `refinement_initiated`, `system_error`).
+*   `event_type`: Type of event (e.g., `task_delegated`, `task_completed`, `task_failed`, `plan_updated`, `task_integrated_into_queue`, `refinement_initiated`, `system_error`, `missing_state_file_error`, `user_request_recheck_state_file`, `user_mark_as_failed_due_to_missing_state_file`, `user_delegate_system_issue_to_planner`, `user_retry_request`, `user_skip_request`, `user_delegate_to_planner_request`, `user_abort_request`).
 *   `task_id`: The `task_id` relevant to this event (can be a specific task ID or a more general identifier for plan-level events).
 *   `details`: An object containing event-specific information.
 *   `actor_mode`: The agent mode that generated this log entry (e.g., `workflow-coordinator`, `strategic-planner`).
