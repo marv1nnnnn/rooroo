@@ -1,6 +1,6 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Specialist Agents 🚀
 
-**Version: v0.4.0** | [Changelog](changelog.md) | [v0.4.0 Details](v0.4.0.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
+**Version: v0.4.1** | [Changelog](changelog.md) | [v0.4.0 Details](v0.4.0.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
 
 `rooroo` provides **minimalist AI orchestration** for software development using **specialist agents** within VS Code via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). It employs a lean, coordinated team with distinct planning and execution phases, driven by a **Coordinator-led, signal-driven workflow** using **`task_queue.jsonl`** for task management and **`task_log.jsonl`** for event logging. The `Strategic Planner` manages the queue, while the `Workflow Coordinator` dispatches tasks and logs progress.
 
@@ -44,13 +44,19 @@ Follow these steps to use the `rooroo` agent team:
     *   The Coordinator waits for the Planner to complete its (re)planning task.
 8.  **Coordinator Executes Plan (Queue Driven & Signal Driven):**
     *   The `Workflow Coordinator` reads the top task from `task_queue.jsonl`.
-    *   If the queue is empty, the process stops.
-    *   It logs the delegation event to `task_log.jsonl`.
-    *   It updates `task_queue.jsonl` by removing the dispatched task.
-    *   It delegates the task to the agent specified in the task's `delegation_details.suggested_mode`.
+    *   If the queue is empty, the process stops. If a task is present but its `task_id` is malformed, the Coordinator logs a system error and awaits Planner intervention.
+    *   It attempts to delegate the task to the agent specified in the task's `delegation_details.suggested_mode` using the `new_task` tool.
+    *   **If delegation fails** (i.e., the `new_task` tool call is unsuccessful):
+        *   The Coordinator logs a `system_error` to `task_log.jsonl` detailing the delegation failure.
+        *   It informs the user about the failure.
+        *   The task remains at the top of `task_queue.jsonl`, and the Coordinator stops processing this task, awaiting Planner review or other intervention.
+    *   **If delegation succeeds:**
+        *   The Coordinator logs the `task_delegated` event to `task_log.jsonl`, noting the `task_id` and the `delegated_to_mode`.
+        *   It then updates `task_queue.jsonl` by removing the successfully dispatched task from the top of the queue.
+        *   It informs the user that the task (e.g., `task_id` - 'description') has been delegated to the specified agent and is now awaiting completion.
     *   The designated agent executes the task, potentially creating artifacts (e.g., specs in `.state/specs/`, code changes in `src/`).
-    *   **Crucially:** Upon completion/failure, the agent creates its own state file (`.state/tasks/{taskId}.json`) detailing status, outputs, and errors.
-    *   The agent signals completion.
+    *   **Crucially:** Upon completion/failure, the agent creates its own state file (`.state/tasks/{taskId}.json`) detailing its status, any outputs (like file references or sub-task proposals), and errors.
+    *   The agent signals completion (or failure) to the platform.
 9.  **Result Processing & Iteration:**
     *   The `Workflow Coordinator` receives the signal and reads the agent's `.state/tasks/{taskId}.json`.
     *   It logs the completion/failure event to `task_log.jsonl`.

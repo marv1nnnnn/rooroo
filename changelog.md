@@ -1,10 +1,16 @@
-# Changelog
+## [v0.4.1] - 2025-05-08
+### Changed
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
+- Updated `customInstructions` for the `Workflow Coordinator` and `Strategic Planner` agents, incorporating the following key enhancements:
+- **Workflow Coordinator:**
+    - **Enhanced Reliability in Task Dispatch:**
+        - The Coordinator now attempts to delegate a task (via the `new_task` tool) *before* logging the delegation or removing the task from `task_queue.jsonl`.
+        - The outcome of the `new_task` tool call is explicitly checked. If delegation fails, a `system_error` is logged to `task_log.jsonl`, the user is informed, and `task_queue.jsonl` remains unchanged (the task stays at the top of the queue). This prevents tasks from being lost due to delegation failures.
+        - A task is removed from `task_queue.jsonl` only *after* the `new_task` call succeeds and the `task_delegated` event is logged.
+    - **Improved Task Parsing from Queue:** Implemented stricter validation for the `task_id` format when parsing tasks from `task_queue.jsonl`. If a `task_id` is malformed, a `system_error` is logged, and the Coordinator awaits intervention from the `Strategic Planner`.
+- **Strategic Planner:**
+    - **Refined Task ID Generation:** Provided more specific guidance for the `NNN#type#subject` task ID format. This includes examples for the `type` (e.g., `feat`, `chore`, `docs`, `test`, `fix`, `design`) and the requirement for `subject` to be in `concise_snake_case`. Also clarifies that the `next_nnn_base` for ID numbering should start at `010` if no higher IDs are found in the queue.
+    - **Self-Task Integration:** The Planner's initial project planning phase now explicitly includes embedding self-referential tasks (e.g., `NNN#chore#integrate_...`, `NNN#chore#review_...`) with full, correctly formatted IDs.
 
 ## [v0.4.0] - 2025-05-08
 
