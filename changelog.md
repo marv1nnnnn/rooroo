@@ -1,3 +1,13 @@
+## [v0.4.3] - 2025-05-09
+### Changed
+- Updated `customInstructions` for most agents, reflecting incremental improvements and version changes in their internal directives. Key changes include:
+    - **Workflow Coordinator**: Enhanced retry logic by pre-fetching original task details from logs. (Internal version updated)
+    - **Strategic Planner**: Stricter logic for `suggested_mode` assignment. Improved error analysis by paying closer attention to `error_message` and structured `error_details` from failed tasks; can now more effectively instruct the Solution Architect to re-plan if Coder Monk fails due to insufficient detail. (Internal version updated)
+    - **Solution Architect**: Now described as a "Mandatory Detailer & Decomposer". Emphasizes creating *cohesive functional units* with granular instructions and adding sub-tasks to the *front* of the queue. State file now explicitly mentions optional structured `error_details`. (Internal version updated)
+    - **Coder Monk**: Renamed to "Best Effort Executor with Self-Correction". Instructions now include an optional self-correction step using lint/build commands. State file must include `notes` on assumptions/self-correction and can include optional structured `error_details`. (Internal version updated)
+    - **UX Specialist, Guardian Validator, DocuCrafter**: State files now explicitly mention optional structured `error_details`. (Internal versions updated)
+    - **Idea Sparker**: Minor internal version update in directives.
+
 ## [v0.4.2] - 2025-05-09
 ### Changed
 
@@ -221,6 +231,3 @@
 
 ## [v0.0.1] - Initial Release
 - Initial project setup and definition of core agent roles.
-
-
-
