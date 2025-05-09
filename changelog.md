@@ -1,3 +1,6 @@
+## [v0.5.1] - 2025-05-09
+Hotfix for invalid groups
+
 ## [v0.5.0] - 2025-05-09
 
 ### BREAKING CHANGE
