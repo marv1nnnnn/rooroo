@@ -1,3 +1,22 @@
+## [v0.5.2] - 2025-05-10
+
+### BREAKING CHANGE
+
+Version 0.5.2 introduces critical changes to path handling conventions across all Rooroo agents and refines communication protocols. These changes are not backward compatible with v0.5.1. The custom instructions for all Rooroo agents (Navigator, Planner, Developer, Analyzer, Documenter, Idea Sparker) have been updated to v6.4 to implement these changes.
+
+- **Fundamental Overhaul of Path Handling & Relativity:**
+    - A crucial distinction is now made for file path interpretation:
+        - **User Project File Paths:** Paths referring to the user's own project files (e.g., source code, documents located in their working directory such as `c:/Users/PC/Documents/code/llm-min.txt`) MUST now be specified and understood by agents as relative to the user's workspace root.
+        - **Rooroo Internal File Paths:** Paths referring to Rooroo's operational files (e.g., within `.rooroo/tasks/`, `.rooroo/logs/`, `.rooroo/plans/`) continue to be relative to the Rooroo system's root directory (e.g., `c:/Users/PC/Documents/code/rooroo`).
+    - This change affects how all agents (`Rooroo Navigator`, `Rooroo Planner`, `Rooroo Developer`, `Rooroo Analyzer`, `Rooroo Documenter`, `Rooroo Idea Sparker`) handle file paths provided in goals, task contexts (`context.md`), tool parameters (e.g., for `read_file`, `write_to_file`), artifact listings, and Markdown links. All agent directives (v6.4) incorporate this new dual-root path understanding.
+
+- **Stricter JSON Formatting for Agent Communication and Logging:**
+    - **Expert Reports:** The JSON string returned by Rooroo experts (Planner, Developer, etc.) to the `Rooroo Navigator` (typically via `attempt_completion`) must now be strictly parsable by `JSON.parse()`.
+    - **Navigator Logging (`SafeLogEvent`):** The `Rooroo Navigator`'s internal `SafeLogEvent` procedure for writing to `.rooroo/logs/activity.jsonl` has been updated to require that the JSON log object be stringified and properly escaped before insertion into the log file.
+
+- **Refined `Rooroo Navigator` Persona & Communication Style:**
+    - The `Rooroo Navigator`'s communication style is now more direct, formal, and concise, avoiding conversational filler (e.g., "Okay," "Sure," "Let's see"). This aligns with a more focused and professional interaction model.
+
 ## [v0.5.1] - 2025-05-09
 Hotfix for invalid groups
 
