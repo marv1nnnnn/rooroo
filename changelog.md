@@ -1,3 +1,22 @@
+## [v0.5.5] - 2025-05-11
+
+### Changed
+- Enhanced `Rooroo Navigator` operational robustness, error handling, and diagnostic capabilities through several key improvements:
+    - Introduced explicit **Core Principles** for the Navigator: Evidence-Based Operation, Proactive Logging, Resilience & Recovery, Project Integrity, and Guardian of the Process.
+    - The **`SafeLogEvent` procedure was significantly improved**:
+        - It now incorporates an `event_severity` parameter, allowing for more granular logging with levels: `INFO`, `WARN`, `ERROR`, `CRITICAL`.
+        - Internal logic for appending to or creating the log file has been refined, along with updated `log_status` outcomes.
+    - A new comprehensive **`HandleCriticalErrorOrHalt` protocol** has been implemented:
+        - This protocol defines clear steps for the Navigator in unrecoverable error scenarios.
+        - It includes setting a `HALTED` operational status, attempting a final diagnostic log entry, and informing the user with a specific halt message, error code, and any associated task ID.
+    - Error handling throughout all operational phases (Task Triage, Queue Processing, Expert Report Handling) has been made significantly more robust:
+        - Critical failures (e.g., inability to read/write/parse the task queue, failures in planner delegation, issues with context creation for the planner) now explicitly trigger the `HandleCriticalErrorOrHalt` protocol, rather than simply transitioning to a user decision point.
+    - Clarified behavior for **updating the task queue file** (`.rooroo/queue.jsonl`):
+        - Explicit instructions ensure that when the queue becomes empty, the content written to the file is an empty string (`""`) and the `line_count` is `0` for correct file truncation.
+    - The Navigator's operational phases and decision logic are now explicitly aware of and integrate with the new `HALTED` status.
+- The custom instructions for the `Rooroo Navigator` agent have been updated to reflect these enhancements, aiming for greater system stability and clearer operational feedback.
+
+
 ## [v0.5.4] - 2025-05-10
 
 ### BREAKING CHANGE & Enhancements

@@ -1,6 +1,6 @@
 # 🚀 rooroo (如如): Minimalist AI Orchestration with Specialist Agents 🚀
 
-**Version: v0.5.4** | [Changelog](changelog.md) | [v0.5.0 Details](v0.5.0.md) | [v0.4.0 Details](v0.4.0.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
+**Version: v0.5.5** | [Changelog](changelog.md) | [v0.5.0 Details](v0.5.0.md) | [v0.4.0 Details](v0.4.0.md) | [v0.3.0 Details](v0.3.0.md) | [v0.2.0 Details](v0.2.0.md) | [v0.1.0 Details](v0.1.0.md)
 
 `rooroo` provides **minimalist AI orchestration** for software development using **specialist Rooroo agents** within VS Code via the [Roo Code extension](https://github.com/RooVetGit/Roo-Code). It employs a lean, coordinated team with distinct planning and execution phases, driven by a **`Rooroo Navigator`-led, Output Envelope-based workflow**. Task management relies on `.rooroo/queue.jsonl`, event logging on `.rooroo/logs/activity.jsonl`, detailed task briefings are provided in `.rooroo/tasks/TASK_ID/context.md`, and agent-produced artifacts are stored directly in `.rooroo/tasks/TASK_ID/`. All file paths are relative to the VS Code workspace root, with Rooroo internal files prefixed by `.rooroo/`.
 
@@ -20,7 +20,7 @@ In the context of this project, the name evokes the idea of an underlying, consi
 ## ✨ Key Principles
 
 *   **Minimalism & Specialization:** A small team of Rooroo agents with clear roles, leveraging appropriate LLM tiers. Adherence to the unified workspace-relative path handling system ensures clarity in file operations: all paths are relative to the VS Code workspace root, and Rooroo internal files are prefixed with `.rooroo/`.
-*   **Navigator-Led Orchestration:** An efficient, interactive workflow where the **🧭 Rooroo Navigator** serves as the primary user interface and central coordinator. It engages the `rooroo-planner` for complex work, dispatches tasks from `.rooroo/queue.jsonl` (paths within are workspace-relative), processes agent responses (structured JSON "Output Envelopes" which must be strictly parsable), logs events to `.rooroo/logs/activity.jsonl` (paths within are workspace-relative) using its `SafeLogEvent` procedure (which involves escaped JSON), and guides the user through decisions and failures. The Navigator employs detailed internal `<thinking>` blocks to manage its complex logic (such as queue parsing, variable state management, and message construction for experts) while maintaining concise user-facing communication. All path references in its operations and instructions adhere to the workspace-relative convention.
+*   **Navigator-Led Orchestration & Resilience:** An efficient, interactive workflow where the **🧭 Rooroo Navigator** serves as the primary user interface and central coordinator. It embodies core principles of evidence-based operation, proactive logging, resilience, project integrity, and adherence to process. It engages the `rooroo-planner` for complex work, dispatches tasks from `.rooroo/queue.jsonl` (paths within are workspace-relative), processes agent responses (structured JSON "Output Envelopes" which must be strictly parsable), logs events with severity to `.rooroo/logs/activity.jsonl` (paths within are workspace-relative) using its `SafeLogEvent` procedure (which involves escaped JSON), and guides the user through decisions and failures, potentially halting on critical, unrecoverable errors. The Navigator employs detailed internal `<thinking>` blocks to manage its complex logic (such as queue parsing, variable state management, and message construction for experts) while maintaining concise user-facing communication. All path references in its operations and instructions adhere to the workspace-relative convention.
 *   **Planner-Managed Queue & Context:** The `rooroo-planner` has sole authority over creating planned tasks for `.rooroo/queue.jsonl` and creates detailed task briefings in `.rooroo/tasks/TASK_ID/context.md` for each sub-task. These contexts and goals clearly use workspace-relative paths for both user project files and Rooroo artifact paths (which start with `.rooroo/` and point directly to artifacts in other task folders, e.g., `.rooroo/tasks/PREVIOUS_TASK_ID/artifact.ext`).
 *   **Output Envelope-Based Communication:** Agents report status, results, or ask questions by returning a structured, strictly parsable JSON string "Output Envelope" directly to the `Rooroo Navigator`. All paths within these envelopes are workspace-relative, with Rooroo artifacts referenced by their direct paths within `.rooroo/tasks/TASK_ID/`.
 *   **Structured Artifacts:** All task-related files (context briefings, agent-produced artifacts) are organized within a clear `.rooroo/tasks/TASK_ID/` structure, with paths being workspace-relative.
@@ -30,10 +30,10 @@ In the context of this project, the name evokes the idea of an underlying, consi
 
 ## 🚀 Get Started & Core Workflow
 
-Follow these steps to use the `rooroo` agent team (v0.5.4+):
+Follow these steps to use the `rooroo` agent team (v0.5.5+):
 
 1.  **Install Roo Code:** Ensure the [Roo Code VS Code extension](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) is installed.
-2.  **Load Modes:** Ensure your `.roomodes` file (v0.5.4 compatible, defining the `rooroo-...` agents) is in your workspace root.
+2.  **Load Modes:** Ensure your `.roomodes` file (v0.5.5 compatible, defining the `rooroo-...` agents) is in your workspace root.
 3.  **Reload VS Code:** Use `Ctrl+Shift+P` or `Cmd+Shift+P` -> "Developer: Reload Window".
 4.  **(Optional) Brainstorming:** Activate **💡 Rooroo Idea Sparker** in Roo Code chat for interactive ideation. It can save summaries to `.rooroo/brainstorming/` or as artifacts within a task (`.rooroo/tasks/TASK_ID/rooroo-idea-sparker_summary.md`) if directed by the `Rooroo Navigator` or `rooroo-planner` as part of a task.
 5.  **Activate Navigator:** Select **🧭 Rooroo Navigator** in Roo Code chat.
@@ -135,9 +135,9 @@ Follow these steps to use the `rooroo` agent team (v0.5.4+):
 
 ## 🤖 The Agent Team & Cost Optimization
 
-`rooroo` v0.5.4 uses specialized Rooroo agents. All agents operate under their directives, which primarily emphasize clearer internal `<thinking>` processes for the Navigator and a simplified, direct artifact storage path for all agents. This allows for cost optimization by assigning appropriate LLM tiers.
+`rooroo` v0.5.5 uses specialized Rooroo agents. All agents operate under their directives, which primarily emphasize clearer internal `<thinking>` processes for the Navigator and a simplified, direct artifact storage path for all agents. This allows for cost optimization by assigning appropriate LLM tiers.
 
-*   **🧭 Rooroo Navigator (⚡ Cheap/Fast Recommended):** Your primary interface and project guide. Manages user interaction with a direct and formal communication style. Triages requests, understanding the unified workspace-relative path system for all file references. Delegates complex work to `rooroo-planner`, simple tasks directly using `ROO#TEMP_` IDs. Dispatches tasks from `.rooroo/queue.jsonl` by invoking other Rooroo experts. Processes their strictly parsable JSON "Output Envelope" responses. Logs events to `.rooroo/logs/activity.jsonl` (using its `SafeLogEvent` procedure with escaped JSON and workspace-relative paths). Handles user decisions, especially for failures or when the queue is empty, using `ask_followup_question`. Critically, the Navigator uses extensive internal `<thinking>` blocks to manage its complex operational logic (like detailed queue parsing, variable state management, dynamic message construction for experts, and report processing) while ensuring all user-facing communication remains concise and to the point. All its operations and instructions to other agents enforce the workspace-relative path convention.
+*   **🧭 Rooroo Navigator (⚡ Cheap/Fast Recommended):** Your primary interface and project guide. Manages user interaction with a direct and formal communication style. Operates based on **Core Principles**: Evidence-Based Operation, Proactive Logging, Resilience & Recovery, Project Integrity, and Guardian of the Process. Triages requests, understanding the unified workspace-relative path system for all file references. Delegates complex work to `rooroo-planner`, simple tasks directly using `ROO#TEMP_` IDs. Dispatches tasks from `.rooroo/queue.jsonl` by invoking other Rooroo experts. Processes their strictly parsable JSON "Output Envelope" responses. Logs events to `.rooroo/logs/activity.jsonl` (using its `SafeLogEvent` procedure with escaped JSON, workspace-relative paths, and **event severity levels** like INFO, WARN, ERROR, CRITICAL). Handles user decisions, especially for failures or when the queue is empty, using `ask_followup_question`. Implements a **`HandleCriticalErrorOrHalt` protocol** for unrecoverable system errors, which stops automated processing and informs the user. Critically, the Navigator uses extensive internal `<thinking>` blocks to manage its complex operational logic (like detailed queue parsing, variable state management, dynamic message construction for experts, and report processing) while ensuring all user-facing communication remains concise and to the point. All its operations and instructions to other agents enforce the workspace-relative path convention.
 *   **🗓️ Rooroo Planner (🧠 Smart/Expensive Recommended):** Receives directives from the Navigator. Designs project plans, assigning `ROO#SUB_` task IDs. Creates detailed context Markdown files for each sub-task in `.rooroo/tasks/SUB_TASK_ID/context.md` (workspace-relative path). These contexts clearly specify goals and reference user project files (workspace-relative paths) and Rooroo artifacts (workspace-relative paths, e.g., `.rooroo/tasks/PREVIOUS_TASK_ID/artifact.ext`, pointing directly to artifacts in other task folders). Reports back to the Navigator via a strictly parsable JSON `PlannerOutput` envelope containing `queue_tasks_json_lines` (with all paths workspace-relative).
 *   **🧑‍💻 Rooroo Developer (Custom / Varies):** Receives `ROO#` task ID, `context_file_path` (workspace-relative, e.g., `.rooroo/tasks/TASK_ID/context.md`), and `goal` from the Navigator. Executes coding tasks based on its `context.md`. Accesses user project files using workspace-relative paths. Rooroo-generated artifacts (e.g., `rooroo-developer_output.log` or `implemented_feature.py`) are stored directly in `.rooroo/tasks/TASK_ID/` (workspace-relative path) or modifies project files at their workspace-relative paths. Reports back via a strictly parsable JSON Output Envelope, with artifact paths specified as workspace-relative (pointing to direct storage in `.rooroo/tasks/TASK_ID/` for Rooroo artifacts).
 *   **📊 Rooroo Analyzer (⚡ Cheap/Fast Recommended):** Receives `ROO#` task ID, `context_file_path` (workspace-relative), and `goal`. Performs analysis based on `context.md`, accessing user project data via workspace-relative paths. Generates reports/findings (e.g., `analysis_report.md`) directly in `.rooroo/tasks/TASK_ID/` (workspace-relative path). Reports back via a strictly parsable JSON Output Envelope with workspace-relative paths (pointing to direct storage in `.rooroo/tasks/TASK_ID/`).
@@ -148,7 +148,7 @@ Follow these steps to use the `rooroo` agent team (v0.5.4+):
 
 *Configure the underlying LLM for each agent mode (if supported) to balance cost and capability.*
 
-## 📁 Directory Structure (v0.5.4)
+## 📁 Directory Structure (v0.5.5)
 
 ```
 <Project Root>/
@@ -176,7 +176,7 @@ Follow these steps to use the `rooroo` agent team (v0.5.4+):
     └── ...
 ```
 
-## 📊 Core Data Files (v0.5.4)
+## 📊 Core Data Files (v0.5.5)
 
 ### `.rooroo/queue.jsonl`
 
@@ -203,15 +203,17 @@ This append-only file records key events in the workflow. Each line is a JSON ob
 
 Example log entry structure (simplified, actual structure defined in Navigator's directives):
 ```json
-{"timestamp": "2024-07-25T10:00:05Z", "agent_slug": "rooroo-navigator", "task_id": "ROO#SUB_parent_S001_setup_database", "event_type": "QUEUE_DISPATCH", "details": "Dispatching to rooroo-developer with goal: Set up the initial database schema..."}
-{"timestamp": "2024-07-25T10:05:00Z", "agent_slug": "rooroo-developer", "task_id": "ROO#SUB_parent_S001_setup_database", "event_type": "EXPERT_REPORT", "details": "Status: Done. Database schema created.", "output_references": [".rooroo/tasks/ROO#SUB_parent_S001_setup_database/schema.sql"]}
-{"timestamp": "2024-07-25T09:55:00Z", "agent_slug": "rooroo-planner", "task_id": "ROO#PLAN_project_init_123", "event_type": "EXPERT_REPORT", "details": "Planning complete. Generated 5 sub-tasks.", "output_references": [".rooroo/plans/ROO#PLAN_project_init_123_plan_overview.md"]}
+{"timestamp": "2024-07-25T10:00:05Z", "agent_slug": "rooroo-navigator", "task_id": "ROO#SUB_parent_S001_setup_database", "event_type": "QUEUE_DISPATCH", "severity": "INFO", "details": "Dispatching to rooroo-developer with goal: Set up the initial database schema..."}
+{"timestamp": "2024-07-25T10:05:00Z", "agent_slug": "rooroo-developer", "task_id": "ROO#SUB_parent_S001_setup_database", "event_type": "EXPERT_REPORT", "severity": "INFO", "details": "Status: Done. Database schema created.", "output_references": [".rooroo/tasks/ROO#SUB_parent_S001_setup_database/schema.sql"]}
+{"timestamp": "2024-07-25T09:55:00Z", "agent_slug": "rooroo-planner", "task_id": "ROO#PLAN_project_init_123", "event_type": "EXPERT_REPORT", "severity": "INFO", "details": "Planning complete. Generated 5 sub-tasks.", "output_references": [".rooroo/plans/ROO#PLAN_project_init_123_plan_overview.md"]}
+{"timestamp": "2024-07-25T10:10:00Z", "agent_slug": "rooroo-navigator", "task_id": "ROO#PLAN_project_init_123", "event_type": "SYSTEM_HALT", "severity": "CRITICAL", "details": {"error_code": "QUEUE_WRITE_FAIL", "message": "CRITICAL: Queue update FAILED after task ROO#SUB_another_task! Project state inconsistent."}}
 ```
 Key fields per log entry (will vary by `event_type` as per Navigator's `SafeLogEvent` definition):
 *   `timestamp`: ISO 8601 timestamp of the event.
 *   `agent_slug`: The Rooroo agent performing or reporting the action.
 *   `task_id`: The `ROO#` task ID related to the event.
-*   `event_type`: Type of event (e.g., `TRIAGE`, `PLAN_REQUEST`, `QUEUE_DISPATCH`, `EXPERT_REPORT`, `USER_DECISION`).
+*   `event_type`: Type of event (e.g., `TRIAGE`, `PLAN_REQUEST`, `QUEUE_DISPATCH`, `EXPERT_REPORT`, `USER_DECISION`, `SYSTEM_HALT`).
+*   `severity`: Log level (e.g., `INFO`, `WARN`, `ERROR`, `CRITICAL`).
 *   `details`: An object or string containing event-specific information (Navigator ensures JSON is properly escaped if it's structured).
 *   `output_references`: Array of workspace-relative paths to relevant artifacts. User project file paths are relative to workspace (e.g., `src/main.py`); Rooroo artifact paths are also relative to workspace and start with `.rooroo/` (e.g., `.rooroo/tasks/TASK_ID/output.json`, pointing directly to the artifact).
 
