@@ -1,3 +1,9 @@
+## [v0.5.9] - 2025-05-22
+### General Updates
+
+- Converted `.roomodes` to YAML format, which is prefered by Roo code after 3.18.0
+- Previous `.roomodes` is now `.roomodes.json`
+
 ## [v0.5.8] - 2025-05-16
 
 ### Agent Definition Enhancements
