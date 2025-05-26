@@ -1,3 +1,23 @@
+## [v0.6.0] - 2025-05-26
+### BREAKING CHANGE & Prompting Enhancements
+
+Version 0.6.0 introduces a critical breaking change in the `Rooroo Navigator`'s direct expert invocation protocol and incorporates system-wide prompting enhancements inspired by recent insights into LLM behavior (e.g., "leaked Claude Sonnet prompt" discussions).
+
+- **BREAKING CHANGE: Navigator Direct Expert Invocation (Triage E):**
+    - The `Rooroo Navigator` previously included the `--context-file` argument in the command message when directly invoking an expert (Developer, Analyzer, Documenter) for an immediate task (Triage E).
+    - In the current `.roomodes`, this `--context-file` argument is **omitted** from the command message specifically for the Triage E scenario: `Delegate: <new_task><mode>{TARGET_EXPERT_MODE}</mode><message>COMMAND: EXECUTE_TASK --task-id {DIRECT_EXEC_TASK_ID} --goal "{refined_goal_for_expert}" ...</message></new_task>`.
+    - **Impact:** Expert agents, which rely on the `--context-file` argument to locate their briefing, will fail when invoked via Triage E. This necessitates a correction in the Navigator's Triage E directive to re-include this argument for proper functioning.
+
+- **Inspired Prompting Enhancements (System-Wide):**
+    - All Rooroo agent directives in `.roomodes` are being updated to leverage advanced prompting techniques for improved clarity, reliability, and LLM guidance. This includes:
+        - **Explicit Role Priming & Persona Definition.**
+        - **Structured Directives & Clear Action Steps.**
+        - **Emphasis on Critical Principles & Constraints.**
+        - **Clear Input/Output Specification with Examples.**
+        - **Encouragement of Internal "Thinking" Processes.**
+        - **Explicit Handling of Ambiguity** (e.g., Principle of Least Assumption).
+    - The goal is to enhance agent performance, reduce misinterpretations, and align agent logic more closely with LLM best practices.
+
 ## [v0.5.10] - 2025-05-23
 ### Agent Logic Enhancements & Protocol Refinements
 
@@ -320,14 +340,14 @@ Version 0.5.0 introduces a fundamental overhaul of the `rooroo` orchestration mo
 - **Project-Wide Configuration (`project_configuration`):**
     - `Strategic Planner` can now define an optional, top-level `project_configuration` object in `project_overview.json` to hold project-specific settings (e.g., tool paths, URLs, common env vars).
     - `Workflow Coordinator` now injects this `project_configuration` (if present) into the `delegation_details.context.project_config` of delegated tasks.
-    - All executing agents (`Solution Architect`, `UX Specialist`, `Guardian Validator`, `DocuCrafter`, `Coder Monk`) are instructed to check for and use this configuration from their context.
+    - All executing agents (`Solution Architect`, `UX Specialist`, `Guardian Validator`, `DocuCrafter`) are instructed to check for and use this configuration from their context.
 - **Centralized Sub-Task ID Assignment:**
     - Agents defining sub-tasks (like `Solution Architect`) now use a temporary `taskId` format `TEMP#type#subject` in their state file's `new_tasks_to_integrate` array.
     - `Workflow Coordinator` is now responsible for reading these temporary tasks, determining the next sequential `NNN` prefix based on existing tasks in `project_overview.json`, assigning the final `NNN#type#subject` ID, and integrating the tasks with their final IDs into the overview.
 
 ### Changed
 
-- **Agent Instructions:** Updated instructions across all relevant agents (`Strategic Planner`, `Workflow Coordinator`, `Solution Architect`, `UX Specialist`, `Guardian Validator`, `DocuCrafter`, `Coder Monk`) to reflect the creation, injection, consumption, or processing of the `project_configuration` object and the handling of temporary (`TEMP#...`) vs. final (`NNN#...`) task IDs.
+- **Agent Instructions:** Updated instructions across all relevant agents (`Strategic Planner`, `Workflow Coordinator`, `Solution Architect`, `UX Specialist`, `Guardian Validator`, `DocuCrafter`) to reflect the creation, injection, consumption, or processing of the `project_configuration` object and the handling of temporary (`TEMP#...`) vs. final (`NNN#...`) task IDs.
 
 ## [v0.2.2] - 2025-05-01
 
